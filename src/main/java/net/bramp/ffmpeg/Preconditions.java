@@ -5,6 +5,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 
 import javax.annotation.Nullable;
+import java.io.File;
 import java.net.URI;
 import java.util.List;
 
@@ -57,4 +58,13 @@ public final class Preconditions {
 
     throw new IllegalArgumentException("not a valid output URL, must use rtp/tcp/udp scheme");
   }
+
+  public static void checkPathValid(String filePath) throws IllegalArgumentException {
+    File file = new File(filePath);
+    if (file.exists())
+      return;
+
+    throw new IllegalArgumentException("invalid file path");
+  }
+
 }

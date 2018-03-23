@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static net.bramp.ffmpeg.Preconditions.checkNotEmpty;
-
+import static net.bramp.ffmpeg.Preconditions.checkPathValid;
 /**
  * Builds a ffmpeg command line
  *
@@ -81,6 +81,9 @@ public class FFmpegBuilder {
   String audioFilter;
   String videoFilter;
   String complexFilter;
+
+  // watermark
+  String warterMark;
 
   public FFmpegBuilder overrideOutputFiles(boolean override) {
     this.override = override;
@@ -198,6 +201,19 @@ public class FFmpegBuilder {
    */
   public FFmpegBuilder setVideoFilter(String filter) {
     this.videoFilter = checkNotEmpty(filter, "filter must not be empty");
+    return this;
+  }
+
+  /**
+   * Sets the video warter mark
+   * @param picPath 水印图片地址
+   * @param x
+   * @param y
+   * @return
+   */
+  public FFmpegBuilder setWaterMark(String picPath, int x, int y) {
+    checkPathValid(picPath);
+    this.warterMark = String.format("%s::%s::%s", picPath, x, y);
     return this;
   }
 
@@ -321,6 +337,11 @@ public class FFmpegBuilder {
 
     if (!Strings.isNullOrEmpty(videoFilter)) {
       args.add("-vf", videoFilter);
+    }
+
+    if (!Strings.isNullOrEmpty(warterMark)) {
+      String[] waterArgs = warterMark.split("::");
+      args.add("-vf", String.format("movie=%s[logo],[in][logo]overlay=x=%s:y=%s[out]", waterArgs[0], waterArgs[1], waterArgs[2]));
     }
 
     if (!Strings.isNullOrEmpty(complexFilter)) {
